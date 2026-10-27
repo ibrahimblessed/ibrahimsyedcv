@@ -3,8 +3,11 @@ import CVPage from "./pages/CVPage";
 import LoginPage from "./pages/LoginPage";
 import AdminPage from "./pages/AdminPage";
 import RequireAuth from "./auth/RequireAuth";
+import { useFx } from "./hooks/useFx";
 
 export default function App() {
+  useFx();
+
   return (
     <Routes>
       <Route path="/" element={<CVPage />} />

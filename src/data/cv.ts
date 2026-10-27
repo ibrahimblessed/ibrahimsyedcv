@@ -63,8 +63,8 @@ export const profile = {
   location: "Johannesburg, Gauteng",
   citizenship: "South African citizen",
   email: "ibrahim.afsyed@gmail.com",
-  linkedin: "https://www.linkedin.com/in/ibrahim-syed",
-  linkedinLabel: "linkedin.com/in/ibrahim-syed",
+  linkedin: "https://www.linkedin.com/in/ibrahim-syed1235",
+linkedinLabel: "linkedin.com/in/ibrahim-syed1235",
   availability: "Open to graduate & internship roles",
   summary:
     "Computer science graduate with 12 distinctions, now completing a BSc Honours in Computing at UNISA. AWS Certified AI Practitioner, and currently working towards the AWS Certified Solutions Architect – Associate. Four freelance projects delivered end to end, from a live Azure-hosted web platform to Android apps with biometric authentication, including one where I led the team. SAP S/4HANA Financial Accounting certified, with growing depth in machine learning through the DeepLearning.AI specialisation. Seeking a graduate or internship role where I can ship production code, work alongside strong engineers, and keep learning fast, on the path to Cloud & AI Solutions Architecture.",

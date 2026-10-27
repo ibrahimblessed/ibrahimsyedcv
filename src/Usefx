@@ -1,0 +1,95 @@
+import { useLayoutEffect } from "react";
+import { useLocation } from "react-router-dom";
+
+/**
+ * Visual effects only (nothing here affects content or data):
+ *  - cursor glow + per-card spotlight that follows the mouse
+ *  - fade-up reveal for sections and cards as they scroll into view
+ *  - highlights the current section in the top nav
+ */
+export function useFx() {
+  const { pathname } = useLocation();
+
+  useLayoutEffect(() => {
+    const root = document.documentElement;
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const cleanups: Array<() => void> = [];
+
+    // ── Cursor glow + card spotlight (mouse only) ──
+    if (!reduce) {
+      let raf = 0;
+      let last: PointerEvent | null = null;
+
+      const apply = () => {
+        raf = 0;
+        if (!last) return;
+        root.style.setProperty("--gx", `${last.clientX}px`);
+        root.style.setProperty("--gy", `${last.clientY}px`);
+        const target = last.target;
+        const el = target instanceof Element ? target.closest<HTMLElement>(".card, .stat") : null;
+        if (el) {
+          const r = el.getBoundingClientRect();
+          el.style.setProperty("--mx", `${last.clientX - r.left}px`);
+          el.style.setProperty("--my", `${last.clientY - r.top}px`);
+        }
+      };
+      const onMove = (e: PointerEvent) => {
+        if (e.pointerType !== "mouse") return;
+        last = e;
+        if (!raf) raf = requestAnimationFrame(apply);
+      };
+
+      document.addEventListener("pointermove", onMove, { passive: true });
+      cleanups.push(() => {
+        document.removeEventListener("pointermove", onMove);
+        if (raf) cancelAnimationFrame(raf);
+      });
+    }
+
+    // ── Scroll reveal ──
+    if (!reduce && "IntersectionObserver" in window) {
+      const io = new IntersectionObserver(
+        (entries) => {
+          for (const entry of entries) {
+            if (entry.isIntersecting) {
+              entry.target.classList.add("in");
+              io.unobserve(entry.target);
+            }
+          }
+        },
+        { threshold: 0.1, rootMargin: "0px 0px -40px 0px" },
+      );
+      document.querySelectorAll<HTMLElement>(".section-head, .card, .stat").forEach((el, i) => {
+        el.setAttribute("data-reveal", "");
+        el.style.setProperty("--d", `${(i % 4) * 70}ms`);
+        io.observe(el);
+      });
+      cleanups.push(() => io.disconnect());
+    }
+
+    // ── Active nav link ──
+    if ("IntersectionObserver" in window) {
+      const links = Array.from(document.querySelectorAll<HTMLAnchorElement>('.nav a[href^="#"]'));
+      if (links.length) {
+        const spy = new IntersectionObserver(
+          (entries) => {
+            for (const entry of entries) {
+              if (!entry.isIntersecting) continue;
+              for (const a of links) {
+                a.classList.toggle("active", a.getAttribute("href") === `#${entry.target.id}`);
+              }
+            }
+          },
+          { rootMargin: "-45% 0px -50% 0px" },
+        );
+        for (const a of links) {
+          const target = document.getElementById((a.getAttribute("href") ?? "").slice(1));
+          if (target) spy.observe(target);
+        }
+        cleanups.push(() => spy.disconnect());
+      }
+    }
+
+    return () => cleanups.forEach((fn) => fn());
+  }, [pathname]);
+}
